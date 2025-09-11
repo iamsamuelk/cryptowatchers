@@ -84,7 +84,8 @@ const formatTimeAgo = (timestamp: string) => {
   return `${Math.floor(diffInSeconds / 3600)}h ago`;
 };
 
-const API_ENDPOINT = "https://hook.eu2.make.com/wqx754uotchgjre956dcee7ooda6bc21";
+const API_ENDPOINT = "https://docs.google.com/spreadsheets/d/1WilDqy_AAzAxNTbY5g7pjOVDprO_yX8i00eZRNfth6I/gviz/tq?tqx=out:json
+";
 
 // Fetch crypto data from Make.com webhook
 const fetchCryptoData = async (): Promise<CryptoData[]> => {
