@@ -47,6 +47,19 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+        },
+        danger: {
+          DEFAULT: "hsl(var(--danger))",
+          foreground: "hsl(var(--danger-foreground))",
+        },
+        crypto: {
+          gold: "hsl(var(--crypto-gold))",
+          silver: "hsl(var(--crypto-silver))",
+          bronze: "hsl(var(--crypto-bronze))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -62,6 +75,15 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      backgroundImage: {
+        "gradient-primary": "var(--gradient-primary)",
+        "gradient-card": "var(--gradient-card)",
+        "gradient-danger": "var(--gradient-danger)",
+      },
+      boxShadow: {
+        "glow": "var(--shadow-glow)",
+        "card": "var(--shadow-card)",
       },
       keyframes: {
         "accordion-down": {
@@ -84,6 +106,32 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "pulse-slow": "var(--animate-pulse-slow)",
+        "glow": "glow 2s ease-in-out infinite alternate",
+      },
+      keyframes: {
+        ...{
+          "accordion-down": {
+            from: {
+              height: "0",
+            },
+            to: {
+              height: "var(--radix-accordion-content-height)",
+            },
+          },
+          "accordion-up": {
+            from: {
+              height: "var(--radix-accordion-content-height)",
+            },
+            to: {
+              height: "0",
+            },
+          },
+        },
+        glow: {
+          "0%": { boxShadow: "0 0 20px hsl(var(--primary) / 0.5)" },
+          "100%": { boxShadow: "0 0 30px hsl(var(--primary) / 0.8)" },
+        },
       },
     },
   },
