@@ -158,8 +158,9 @@ export default function CryptoDashboard() {
   });
 
   // Use API data if available, otherwise fallback to mock data
-  const cryptoData: CryptoData[] = apiData || mockData;
-  const significantMoves = cryptoData.filter(crypto => Math.abs(crypto.change24h) > 5);
+  const cryptoData: CryptoData[] = (apiData || mockData).sort((a, b) => b.price - a.price);
+  const topGainers = cryptoData.filter(crypto => crypto.change24h > 5).sort((a, b) => b.change24h - a.change24h).slice(0, 3);
+  const topLosers = cryptoData.filter(crypto => crypto.change24h < -5).sort((a, b) => a.change24h - b.change24h).slice(0, 3);
   const isUsingLiveData = !!apiData && !isError;
 
   // Update last update time when data changes
@@ -256,22 +257,30 @@ export default function CryptoDashboard() {
         </Card>
       )}
 
-      {/* Alerts Section */}
-      {significantMoves.length > 0 && (
-        <Card className="bg-gradient-card border-primary/20 shadow-glow">
+      {/* Top Gainers Section */}
+      {topGainers.length > 0 && (
+        <Card className="bg-gradient-to-r from-success/10 to-success/5 border-success/20 shadow-glow">
           <div className="p-6">
             <div className="flex items-center gap-2 mb-4">
-              <AlertTriangle className="w-5 h-5 text-primary" />
-              <h2 className="text-xl font-semibold">Price Alerts</h2>
-              <Badge variant="outline" className="ml-auto">
-                {significantMoves.length} active
+              <TrendingUp className="w-5 h-5 text-success" />
+              <h2 className="text-xl font-semibold text-success">Top Gainers</h2>
+              <Badge variant="outline" className="ml-auto border-success/30 text-success">
+                +{topGainers.length}
               </Badge>
             </div>
             <div className="space-y-3">
-              {significantMoves.map(crypto => (
-                <div key={crypto.id} className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg">
+              {topGainers.map(crypto => (
+                <div 
+                  key={crypto.id} 
+                  className="flex items-center justify-between p-3 bg-success/10 rounded-lg cursor-pointer hover:bg-success/20 transition-colors"
+                  onClick={() => window.open(`https://www.coingecko.com/en/coins/${crypto.id}`, '_blank')}
+                >
                   <div className="flex items-center gap-3">
-                    <span className="text-2xl">{crypto.logo}</span>
+                    <img src={crypto.logo} alt={crypto.name} className="w-8 h-8 rounded-full" onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                    }} />
+                    <span className="text-2xl hidden">{crypto.symbol.charAt(0)}</span>
                     <div>
                       <p className="font-medium">{crypto.name}</p>
                       <p className="text-sm text-muted-foreground">{crypto.symbol}</p>
@@ -279,14 +288,9 @@ export default function CryptoDashboard() {
                   </div>
                   <div className="text-right">
                     <p className="font-semibold">{formatCurrency(crypto.price)}</p>
-                    <div className={`flex items-center gap-1 text-sm ${
-                      crypto.change24h >= 0 ? 'text-success' : 'text-danger'
-                    }`}>
-                      {crypto.change24h >= 0 ? 
-                        <TrendingUp className="w-3 h-3" /> : 
-                        <TrendingDown className="w-3 h-3" />
-                      }
-                      {Math.abs(crypto.change24h).toFixed(2)}%
+                    <div className="flex items-center gap-1 text-sm text-success">
+                      <TrendingUp className="w-3 h-3" />
+                      +{crypto.change24h.toFixed(2)}%
                     </div>
                   </div>
                 </div>
@@ -296,20 +300,79 @@ export default function CryptoDashboard() {
         </Card>
       )}
 
-      {/* Crypto Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {cryptoData.map((crypto) => (
-          <Card key={crypto.id} className="bg-gradient-card shadow-card hover:shadow-glow transition-all duration-300 group">
-            <div className="p-6">
-              {/* Header */}
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="text-3xl">{crypto.logo}</div>
-                  <div>
-                    <h3 className="font-bold text-lg">{crypto.name}</h3>
-                    <p className="text-muted-foreground text-sm">{crypto.symbol}</p>
+      {/* Top Losers Section */}
+      {topLosers.length > 0 && (
+        <Card className="bg-gradient-to-r from-danger/10 to-danger/5 border-danger/20 shadow-glow">
+          <div className="p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <TrendingDown className="w-5 h-5 text-danger" />
+              <h2 className="text-xl font-semibold text-danger">Top Losers</h2>
+              <Badge variant="outline" className="ml-auto border-danger/30 text-danger">
+                -{topLosers.length}
+              </Badge>
+            </div>
+            <div className="space-y-3">
+              {topLosers.map(crypto => (
+                <div 
+                  key={crypto.id} 
+                  className="flex items-center justify-between p-3 bg-danger/10 rounded-lg cursor-pointer hover:bg-danger/20 transition-colors"
+                  onClick={() => window.open(`https://www.coingecko.com/en/coins/${crypto.id}`, '_blank')}
+                >
+                  <div className="flex items-center gap-3">
+                    <img src={crypto.logo} alt={crypto.name} className="w-8 h-8 rounded-full" onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                    }} />
+                    <span className="text-2xl hidden">{crypto.symbol.charAt(0)}</span>
+                    <div>
+                      <p className="font-medium">{crypto.name}</p>
+                      <p className="text-sm text-muted-foreground">{crypto.symbol}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold">{formatCurrency(crypto.price)}</p>
+                    <div className="flex items-center gap-1 text-sm text-danger">
+                      <TrendingDown className="w-3 h-3" />
+                      {crypto.change24h.toFixed(2)}%
+                    </div>
                   </div>
                 </div>
+              ))}
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* All Cryptocurrencies - Sorted by Price */}
+      <div>
+        <div className="flex items-center gap-2 mb-4">
+          <DollarSign className="w-5 h-5 text-primary" />
+          <h2 className="text-xl font-semibold">All Cryptocurrencies</h2>
+          <Badge variant="outline" className="ml-auto">
+            Sorted by Price
+          </Badge>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {cryptoData.map((crypto) => (
+            <Card 
+              key={crypto.id} 
+              className="bg-gradient-card shadow-card hover:shadow-glow transition-all duration-300 group cursor-pointer"
+              onClick={() => window.open(`https://www.coingecko.com/en/coins/${crypto.id}`, '_blank')}
+            >
+              <div className="p-6">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <img src={crypto.logo} alt={crypto.name} className="w-12 h-12 rounded-full" onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                    }} />
+                    <div className="text-3xl hidden">{crypto.symbol.charAt(0)}</div>
+                    <div>
+                      <h3 className="font-bold text-lg">{crypto.name}</h3>
+                      <p className="text-muted-foreground text-sm">{crypto.symbol}</p>
+                    </div>
+                  </div>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="text-xs">
                     #{crypto.rank}
@@ -374,15 +437,19 @@ export default function CryptoDashboard() {
             </div>
           </Card>
         ))}
+        </div>
       </div>
 
       {/* Footer */}
-      <div className="text-center text-muted-foreground text-sm">
+      <div className="text-center text-muted-foreground text-sm space-y-1">
         <p>
           {isUsingLiveData 
             ? 'Connected to Google Sheets • Auto-refresh every 30 seconds' 
             : 'Demo mode • Connect to Google Sheets for live data'
           }
+        </p>
+        <p className="text-xs">
+          Market data provided by CoinGecko
         </p>
       </div>
     </div>
