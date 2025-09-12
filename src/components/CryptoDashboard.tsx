@@ -84,42 +84,55 @@ const formatTimeAgo = (timestamp: string) => {
   return `${Math.floor(diffInSeconds / 3600)}h ago`;
 };
 
-const API_ENDPOINT = "https://hook.eu2.make.com/wqx754uotchgjre956dcee7ooda6bc21";
+// Convert Google Sheets URL to CSV export format
+const SHEET_ID = "1WilDqy_AAzAxNTbY5g7pjOVDprO_yX8i00eZRNfth6I";
+const API_ENDPOINT = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
 
-// Fetch crypto data from Make.com webhook
+// Parse CSV data into array of objects
+const parseCSV = (csvText: string): any[] => {
+  const lines = csvText.trim().split('\n');
+  if (lines.length < 2) return [];
+  
+  const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+  return lines.slice(1).map(line => {
+    const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
+    const obj: any = {};
+    headers.forEach((header, index) => {
+      obj[header] = values[index] || '';
+    });
+    return obj;
+  });
+};
+
+// Fetch crypto data from Google Sheets
 const fetchCryptoData = async (): Promise<CryptoData[]> => {
   try {
     const response = await fetch(API_ENDPOINT, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
     });
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
-    const data = await response.json();
+    const csvText = await response.text();
+    const data = parseCSV(csvText);
     
-    // Handle different possible response structures
-    let cryptoArray = Array.isArray(data) ? data : data.data || data.coins || [data];
-    
-    // Transform API data to our CryptoData interface
-    return cryptoArray.map((item: any, index: number) => ({
-      id: item.id || item.name?.toLowerCase() || `crypto-${index}`,
-      name: item.name || item.coin_name || 'Unknown',
-      symbol: item.symbol || item.coin_symbol || 'N/A',
-      price: parseFloat(item.price || item.current_price || item.price_usd || 0),
-      change24h: parseFloat(item.change24h || item.price_change_percentage_24h || item.change_24h || 0),
-      marketCap: parseFloat(item.market_cap || item.marketCap || item.market_cap_usd || 0),
-      volume24h: parseFloat(item.volume24h || item.total_volume || item.volume_24h || 0),
-      logo: item.logo || item.image || item.symbol?.charAt(0) || '₿',
-      rank: parseInt(item.rank || item.market_cap_rank || index + 1),
-      lastUpdated: item.last_updated || item.updated_at || new Date().toISOString(),
+    // Transform CSV data to our CryptoData interface
+    return data.map((item: any, index: number) => ({
+      id: item.id || item.name?.toLowerCase().replace(/\s+/g, '-') || `crypto-${index}`,
+      name: item.name || item.coin_name || item.Name || 'Unknown',
+      symbol: item.symbol || item.coin_symbol || item.Symbol || 'N/A',
+      price: parseFloat(item.price || item.current_price || item.Price || item.price_usd || 0),
+      change24h: parseFloat(item.change24h || item.price_change_percentage_24h || item.Change24h || item.change_24h || 0),
+      marketCap: parseFloat(item.market_cap || item.marketCap || item.MarketCap || item.market_cap_usd || 0),
+      volume24h: parseFloat(item.volume24h || item.total_volume || item.Volume24h || item.volume_24h || 0),
+      logo: item.logo || item.image || item.Logo || item.symbol?.charAt(0) || '₿',
+      rank: parseInt(item.rank || item.market_cap_rank || item.Rank || index + 1),
+      lastUpdated: item.last_updated || item.updated_at || item.LastUpdated || new Date().toISOString(),
     }));
   } catch (error) {
-    console.error('Error fetching crypto data:', error);
+    console.error('Error fetching crypto data from Google Sheets:', error);
     throw error;
   }
 };
@@ -219,7 +232,7 @@ export default function CryptoDashboard() {
         <Card className="bg-gradient-card border-primary/20">
           <div className="p-6 text-center">
             <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
-            <p className="text-lg font-medium">Connecting to Make.com webhook...</p>
+            <p className="text-lg font-medium">Connecting to Google Sheets...</p>
             <p className="text-muted-foreground">Fetching latest crypto data</p>
           </div>
         </Card>
@@ -234,7 +247,7 @@ export default function CryptoDashboard() {
               <h2 className="text-lg font-semibold text-danger-foreground">API Connection Failed</h2>
             </div>
             <p className="text-danger-foreground/80 mb-3">
-              {error instanceof Error ? error.message : 'Unable to connect to Make.com webhook'}
+              {error instanceof Error ? error.message : 'Unable to connect to Google Sheets'}
             </p>
             <p className="text-sm text-danger-foreground/60">
               Displaying demo data. Click refresh to retry connection.
@@ -367,8 +380,8 @@ export default function CryptoDashboard() {
       <div className="text-center text-muted-foreground text-sm">
         <p>
           {isUsingLiveData 
-            ? 'Connected to Make.com webhook • Auto-refresh every 30 seconds' 
-            : 'Demo mode • Connect to Make.com webhook for live data'
+            ? 'Connected to Google Sheets • Auto-refresh every 30 seconds' 
+            : 'Demo mode • Connect to Google Sheets for live data'
           }
         </p>
       </div>
