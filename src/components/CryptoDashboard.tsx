@@ -119,18 +119,27 @@ const fetchCryptoData = async (): Promise<CryptoData[]> => {
     const data = parseCSV(csvText);
     
     // Transform CSV data to our CryptoData interface using exact column names
-    return data.map((item: any, index: number) => ({
-      id: item.coin_id || item.name?.toLowerCase().replace(/\s+/g, '-') || `crypto-${index}`,
-      name: item.name || 'Unknown',
-      symbol: item.symbol || 'N/A',
-      price: parseFloat(item.last_price?.replace(/[,$]/g, '') || 0),
-      change24h: parseFloat(item.last_change_pct || 0),
-      marketCap: parseFloat(item.market_cap?.replace(/[,$]/g, '') || 0),
-      volume24h: parseFloat(item.volume?.replace(/[,$]/g, '') || 0),
-      logo: item.logo_url || item.symbol?.charAt(0) || '₿',
-      rank: parseInt(item.rank || index + 1),
-      lastUpdated: item.last_alert_timestamp || new Date().toISOString(),
-    }));
+    return data.map((item: any, index: number) => {
+      // Extract numeric ID from CoinGecko logo URL
+      const extractNumericId = (logoUrl: string): number => {
+        if (!logoUrl) return index + 1;
+        const match = logoUrl.match(/\/images\/(\d+)\//);
+        return match ? parseInt(match[1]) : index + 1;
+      };
+
+      return {
+        id: item.coin_id || item.name?.toLowerCase().replace(/\s+/g, '-') || `crypto-${index}`,
+        name: item.name || 'Unknown',
+        symbol: item.symbol || 'N/A',
+        price: parseFloat(item.last_price?.replace(/[,$]/g, '') || 0),
+        change24h: parseFloat(item.last_change_pct || 0),
+        marketCap: parseFloat(item.market_cap?.replace(/[,$]/g, '') || 0),
+        volume24h: parseFloat(item.volume?.replace(/[,$]/g, '') || 0),
+        logo: item.logo_url || '₿',
+        rank: extractNumericId(item.logo_url),
+        lastUpdated: item.last_alert_timestamp || new Date().toISOString(),
+      };
+    });
   } catch (error) {
     console.error('Error fetching crypto data from Google Sheets:', error);
     throw error;
