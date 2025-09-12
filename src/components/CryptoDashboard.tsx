@@ -118,18 +118,18 @@ const fetchCryptoData = async (): Promise<CryptoData[]> => {
     const csvText = await response.text();
     const data = parseCSV(csvText);
     
-    // Transform CSV data to our CryptoData interface
+    // Transform CSV data to our CryptoData interface using exact column names
     return data.map((item: any, index: number) => ({
-      id: item.id || item.name?.toLowerCase().replace(/\s+/g, '-') || `crypto-${index}`,
-      name: item.name || item.coin_name || item.Name || 'Unknown',
-      symbol: item.symbol || item.coin_symbol || item.Symbol || 'N/A',
-      price: parseFloat(item.price || item.current_price || item.Price || item.price_usd || 0),
-      change24h: parseFloat(item.change24h || item.price_change_percentage_24h || item.Change24h || item.change_24h || 0),
-      marketCap: parseFloat(item.market_cap || item.marketCap || item.MarketCap || item.market_cap_usd || 0),
-      volume24h: parseFloat(item.volume24h || item.total_volume || item.Volume24h || item.volume_24h || 0),
-      logo: item.logo || item.image || item.Logo || item.symbol?.charAt(0) || '₿',
-      rank: parseInt(item.rank || item.market_cap_rank || item.Rank || index + 1),
-      lastUpdated: item.last_updated || item.updated_at || item.LastUpdated || new Date().toISOString(),
+      id: item.coin_id || item.name?.toLowerCase().replace(/\s+/g, '-') || `crypto-${index}`,
+      name: item.name || 'Unknown',
+      symbol: item.symbol || 'N/A',
+      price: parseFloat(item.last_price?.replace(/[,$]/g, '') || 0),
+      change24h: parseFloat(item.last_change_pct || 0),
+      marketCap: parseFloat(item.market_cap?.replace(/[,$]/g, '') || 0),
+      volume24h: parseFloat(item.volume?.replace(/[,$]/g, '') || 0),
+      logo: item.logo_url || item.symbol?.charAt(0) || '₿',
+      rank: parseInt(item.rank || index + 1),
+      lastUpdated: item.last_alert_timestamp || new Date().toISOString(),
     }));
   } catch (error) {
     console.error('Error fetching crypto data from Google Sheets:', error);
