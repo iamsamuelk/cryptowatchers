@@ -75,8 +75,14 @@ const formatLargeNumber = (value: number) => {
 };
 
 const formatTimeAgo = (timestamp: string) => {
+  const sanitize = (s: string) => {
+    if (!s) return new Date();
+    const cleaned = s.replace(/'/g, '');
+    const d = new Date(cleaned);
+    return isNaN(d.getTime()) ? new Date() : d;
+  };
   const now = new Date();
-  const time = new Date(timestamp);
+  const time = sanitize(timestamp);
   const diffInSeconds = Math.floor((now.getTime() - time.getTime()) / 1000);
   
   if (diffInSeconds < 60) return `${diffInSeconds}s ago`;
@@ -168,8 +174,8 @@ export default function CryptoDashboard() {
 
   // Use API data if available, otherwise fallback to mock data
   const cryptoData: CryptoData[] = (apiData || mockData).sort((a, b) => b.price - a.price);
-  const topGainers = cryptoData.filter(crypto => crypto.change24h > 5).sort((a, b) => b.change24h - a.change24h).slice(0, 3);
-  const topLosers = cryptoData.filter(crypto => crypto.change24h < -5).sort((a, b) => a.change24h - b.change24h).slice(0, 3);
+  const topGainers = cryptoData.filter(crypto => crypto.change24h > 0).sort((a, b) => b.change24h - a.change24h).slice(0, 3);
+  const topLosers = cryptoData.filter(crypto => crypto.change24h < 0).sort((a, b) => a.change24h - b.change24h).slice(0, 3);
   const isUsingLiveData = !!apiData && !isError;
 
   // Update last update time when data changes
@@ -285,7 +291,7 @@ export default function CryptoDashboard() {
                   onClick={() => window.open(`https://www.coingecko.com/en/coins/${crypto.id}`, '_blank')}
                 >
                   <div className="flex items-center gap-3">
-                    <img src={crypto.logo} alt={crypto.name} className="w-8 h-8 rounded-full" onError={(e) => {
+                    <img src={crypto.logo} alt={`${crypto.name} logo`} loading="lazy" className="w-8 h-8 rounded-full" onError={(e) => {
                       e.currentTarget.style.display = 'none';
                       e.currentTarget.nextElementSibling?.classList.remove('hidden');
                     }} />
@@ -328,7 +334,7 @@ export default function CryptoDashboard() {
                   onClick={() => window.open(`https://www.coingecko.com/en/coins/${crypto.id}`, '_blank')}
                 >
                   <div className="flex items-center gap-3">
-                    <img src={crypto.logo} alt={crypto.name} className="w-8 h-8 rounded-full" onError={(e) => {
+                    <img src={crypto.logo} alt={`${crypto.name} logo`} loading="lazy" className="w-8 h-8 rounded-full" onError={(e) => {
                       e.currentTarget.style.display = 'none';
                       e.currentTarget.nextElementSibling?.classList.remove('hidden');
                     }} />
@@ -372,10 +378,10 @@ export default function CryptoDashboard() {
               {/* Header */}
               <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <img src={crypto.logo} alt={crypto.name} className="w-12 h-12 rounded-full" onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                      e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                    }} />
+                    <img src={crypto.logo} alt={`${crypto.name} logo`} loading="lazy" className="w-12 h-12 rounded-full" onError={(e) => {
+                       e.currentTarget.style.display = 'none';
+                       e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                     }} />
                     <div className="text-3xl hidden">{crypto.symbol.charAt(0)}</div>
                     <div>
                       <h3 className="font-bold text-lg">{crypto.name}</h3>
@@ -386,15 +392,6 @@ export default function CryptoDashboard() {
                   <Badge variant="outline" className="text-xs">
                     #{crypto.rank}
                   </Badge>
-                  {crypto.rank <= 3 && (
-                    <span className={`text-lg ${
-                      crypto.rank === 1 ? 'text-crypto-gold' :
-                      crypto.rank === 2 ? 'text-crypto-silver' : 
-                      'text-crypto-bronze'
-                    }`}>
-                      {crypto.rank === 1 ? '🥇' : crypto.rank === 2 ? '🥈' : '🥉'}
-                    </span>
-                  )}
                 </div>
               </div>
 
@@ -458,7 +455,7 @@ export default function CryptoDashboard() {
           }
         </p>
         <p className="text-xs">
-          Market data provided by CoinGecko
+          All data sourced from CoinGecko
         </p>
       </div>
     </div>
