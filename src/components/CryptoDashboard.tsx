@@ -71,15 +71,15 @@ const formatCurrency = (value: number) => {
 const formatLargeNumber = (value: number) => {
   if (value >= 1e12) {
     const formatted = (value / 1e12);
-    return `$${formatted % 1 === 0 ? formatted.toFixed(0) : formatted.toFixed(2)}T`;
+    return `$${formatted.toFixed(2)}T`;
   }
   if (value >= 1e9) {
     const formatted = (value / 1e9);
-    return `$${formatted % 1 === 0 ? formatted.toFixed(0) : formatted.toFixed(2)}B`;
+    return formatted >= 100 ? `$${Math.round(formatted)}B` : `$${formatted.toFixed(1)}B`;
   }
   if (value >= 1e6) {
     const formatted = (value / 1e6);
-    return `$${formatted % 1 === 0 ? formatted.toFixed(0) : formatted.toFixed(2)}M`;
+    return formatted >= 100 ? `$${Math.round(formatted)}M` : `$${formatted.toFixed(1)}M`;
   }
   return `$${value.toFixed(2)}`;
 };
