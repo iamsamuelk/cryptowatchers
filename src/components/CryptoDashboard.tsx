@@ -75,11 +75,11 @@ const formatLargeNumber = (value: number) => {
   }
   if (value >= 1e9) {
     const formatted = (value / 1e9);
-    return formatted >= 100 ? `$${Math.round(formatted)}B` : `$${formatted.toFixed(1)}B`;
+    return `$${Math.round(formatted)}B`;
   }
   if (value >= 1e6) {
     const formatted = (value / 1e6);
-    return formatted >= 100 ? `$${Math.round(formatted)}M` : `$${formatted.toFixed(1)}M`;
+    return `$${Math.round(formatted)}M`;
   }
   return `$${value.toFixed(2)}`;
 };
