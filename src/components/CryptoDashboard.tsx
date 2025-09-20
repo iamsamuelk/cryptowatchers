@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TrendingUp, TrendingDown, AlertTriangle, DollarSign, Activity, Clock, Wifi, WifiOff, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -68,9 +69,18 @@ const formatCurrency = (value: number) => {
 };
 
 const formatLargeNumber = (value: number) => {
-  if (value >= 1e12) return `$${(value / 1e12).toFixed(2)}T`;
-  if (value >= 1e9) return `$${(value / 1e9).toFixed(2)}B`;
-  if (value >= 1e6) return `$${(value / 1e6).toFixed(2)}M`;
+  if (value >= 1e12) {
+    const formatted = (value / 1e12);
+    return `$${formatted % 1 === 0 ? formatted.toFixed(0) : formatted.toFixed(2)}T`;
+  }
+  if (value >= 1e9) {
+    const formatted = (value / 1e9);
+    return `$${formatted % 1 === 0 ? formatted.toFixed(0) : formatted.toFixed(2)}B`;
+  }
+  if (value >= 1e6) {
+    const formatted = (value / 1e6);
+    return `$${formatted % 1 === 0 ? formatted.toFixed(0) : formatted.toFixed(2)}M`;
+  }
   return `$${value.toFixed(2)}`;
 };
 
@@ -155,6 +165,7 @@ const fetchCryptoData = async (): Promise<CryptoData[]> => {
 export default function CryptoDashboard() {
   const { toast } = useToast();
   const [lastUpdate, setLastUpdate] = useState(new Date());
+  const [sortBy, setSortBy] = useState<'price' | 'name' | 'marketCap' | 'volume24h'>('price');
 
   // Use React Query for data fetching with auto-refresh
   const { 
@@ -173,7 +184,20 @@ export default function CryptoDashboard() {
   });
 
   // Use API data if available, otherwise fallback to mock data
-  const cryptoData: CryptoData[] = (apiData || mockData).sort((a, b) => b.price - a.price);
+  const sortedCryptoData = (apiData || mockData).sort((a, b) => {
+    switch (sortBy) {
+      case 'name':
+        return a.name.localeCompare(b.name);
+      case 'marketCap':
+        return b.marketCap - a.marketCap;
+      case 'volume24h':
+        return b.volume24h - a.volume24h;
+      case 'price':
+      default:
+        return b.price - a.price;
+    }
+  });
+  const cryptoData: CryptoData[] = sortedCryptoData;
   const topGainers = cryptoData.filter(crypto => crypto.change24h > 0).sort((a, b) => b.change24h - a.change24h).slice(0, 3);
   const topLosers = cryptoData.filter(crypto => crypto.change24h < 0).sort((a, b) => a.change24h - b.change24h).slice(0, 3);
   const isUsingLiveData = !!apiData && !isError;
@@ -358,14 +382,24 @@ export default function CryptoDashboard() {
         </Card>
       )}
 
-      {/* All Cryptocurrencies - Sorted by Price */}
+      {/* All Cryptocurrencies */}
       <div>
         <div className="flex items-center gap-2 mb-4">
           <DollarSign className="w-5 h-5 text-primary" />
           <h2 className="text-xl font-semibold">All Cryptocurrencies</h2>
-          <Badge variant="outline" className="ml-auto">
-            Sorted by Price
-          </Badge>
+          <div className="ml-auto flex items-center gap-2">
+            <Select value={sortBy} onValueChange={(value: 'price' | 'name' | 'marketCap' | 'volume24h') => setSortBy(value)}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="price">Price</SelectItem>
+                <SelectItem value="name">Name</SelectItem>
+                <SelectItem value="marketCap">Market Cap</SelectItem>
+                <SelectItem value="volume24h">Volume 24h</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {cryptoData.map((crypto) => (
