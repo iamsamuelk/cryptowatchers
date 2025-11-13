@@ -165,7 +165,7 @@ const fetchCryptoData = async (): Promise<CryptoData[]> => {
 export default function CryptoDashboard() {
   const { toast } = useToast();
   const [lastUpdate, setLastUpdate] = useState(new Date());
-  const [sortBy, setSortBy] = useState<'price' | 'name' | 'marketCap' | 'volume24h'>('price');
+  const [sortBy, setSortBy] = useState<'price' | 'name' | 'marketCap' | 'volume24h' | 'updated'>('price');
 
   // Use React Query for data fetching with auto-refresh
   const { 
@@ -192,6 +192,8 @@ export default function CryptoDashboard() {
         return b.marketCap - a.marketCap;
       case 'volume24h':
         return b.volume24h - a.volume24h;
+      case 'updated':
+        return new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime();
       case 'price':
       default:
         return b.price - a.price;
@@ -388,7 +390,7 @@ export default function CryptoDashboard() {
           <DollarSign className="w-5 h-5 text-primary" />
           <h2 className="text-xl font-semibold">All Cryptocurrencies</h2>
           <div className="ml-auto flex items-center gap-2">
-            <Select value={sortBy} onValueChange={(value: 'price' | 'name' | 'marketCap' | 'volume24h') => setSortBy(value)}>
+            <Select value={sortBy} onValueChange={(value: 'price' | 'name' | 'marketCap' | 'volume24h' | 'updated') => setSortBy(value)}>
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
@@ -397,6 +399,7 @@ export default function CryptoDashboard() {
                 <SelectItem value="name">Name</SelectItem>
                 <SelectItem value="marketCap">Market Cap</SelectItem>
                 <SelectItem value="volume24h">Volume 24h</SelectItem>
+                <SelectItem value="updated">Updated</SelectItem>
               </SelectContent>
             </Select>
           </div>
