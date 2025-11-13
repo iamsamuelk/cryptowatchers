@@ -298,9 +298,11 @@ export default function CryptoDashboard() {
         </Card>
       )}
 
-      {/* Top Gainers Section */}
-      {topGainers.length > 0 && (
-        <Card className="bg-gradient-to-r from-success/10 to-success/5 border-success/20 shadow-glow">
+      {/* Top Gainers and Losers - Side by Side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Top Gainers Section */}
+        {topGainers.length > 0 && (
+          <Card className="bg-gradient-to-r from-success/10 to-success/5 border-success/20 shadow-glow">
           <div className="p-6">
             <div className="flex items-center gap-2 mb-4">
               <TrendingUp className="w-5 h-5 text-success" />
@@ -317,7 +319,7 @@ export default function CryptoDashboard() {
                   onClick={() => window.open(`https://www.coingecko.com/en/coins/${crypto.id}`, '_blank')}
                 >
                   <div className="flex items-center gap-3">
-                    <img src={crypto.logo} alt={`${crypto.name} logo`} loading="lazy" className="w-8 h-8 rounded-full" onError={(e) => {
+                    <img src={crypto.logo} alt={`${crypto.name} logo`} loading="lazy" className="w-8 h-8 rounded-full object-cover" onError={(e) => {
                       e.currentTarget.style.display = 'none';
                       e.currentTarget.nextElementSibling?.classList.remove('hidden');
                     }} />
@@ -339,10 +341,10 @@ export default function CryptoDashboard() {
             </div>
           </div>
         </Card>
-      )}
+        )}
 
-      {/* Top Losers Section */}
-      {topLosers.length > 0 && (
+        {/* Top Losers Section */}
+        {topLosers.length > 0 && (
         <Card className="bg-gradient-to-r from-danger/10 to-danger/5 border-danger/20 shadow-glow">
           <div className="p-6">
             <div className="flex items-center gap-2 mb-4">
@@ -360,7 +362,7 @@ export default function CryptoDashboard() {
                   onClick={() => window.open(`https://www.coingecko.com/en/coins/${crypto.id}`, '_blank')}
                 >
                   <div className="flex items-center gap-3">
-                    <img src={crypto.logo} alt={`${crypto.name} logo`} loading="lazy" className="w-8 h-8 rounded-full" onError={(e) => {
+                    <img src={crypto.logo} alt={`${crypto.name} logo`} loading="lazy" className="w-8 h-8 rounded-full object-cover" onError={(e) => {
                       e.currentTarget.style.display = 'none';
                       e.currentTarget.nextElementSibling?.classList.remove('hidden');
                     }} />
@@ -382,7 +384,8 @@ export default function CryptoDashboard() {
             </div>
           </div>
         </Card>
-      )}
+        )}
+      </div>
 
       {/* All Cryptocurrencies */}
       <div>
@@ -415,10 +418,16 @@ export default function CryptoDashboard() {
               {/* Header */}
               <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <img src={crypto.logo} alt={`${crypto.name} logo`} loading="lazy" className="w-12 h-12 rounded-full" onError={(e) => {
-                       e.currentTarget.style.display = 'none';
-                       e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                     }} />
+                    <img 
+                      src={crypto.logo} 
+                      alt={`${crypto.name} logo`} 
+                      loading="lazy" 
+                      className="w-12 h-12 rounded-full object-cover" 
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                      }} 
+                    />
                     <div className="text-3xl hidden">{crypto.symbol.charAt(0)}</div>
                     <div>
                       <h3 className="font-bold text-lg">{crypto.name}</h3>
