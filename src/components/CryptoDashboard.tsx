@@ -165,7 +165,7 @@ const fetchCryptoData = async (): Promise<CryptoData[]> => {
 export default function CryptoDashboard() {
   const { toast } = useToast();
   const [lastUpdate, setLastUpdate] = useState(new Date());
-  const [sortBy, setSortBy] = useState<'price' | 'name' | 'marketCap' | 'volume24h' | 'updated'>('price');
+  const [sortBy, setSortBy] = useState<'price' | 'name' | 'marketCap' | 'volume24h' | 'updated'>('updated');
 
   // Use React Query for data fetching with auto-refresh
   const { 
